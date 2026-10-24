@@ -1,7 +1,7 @@
 //! Janelas de diálogo: conexão, edição de documentos e campos, confirmações,
 //! operações em massa, índices, coleções, exportação, comandos e explain.
 
-use crate::app::{App, fmt_num};
+use crate::app::{App, fmt_num, keys};
 use crate::completion::EditorKind;
 use crate::config::SavedConnection;
 use crate::editor::{CodeEditor, code_view};
@@ -652,7 +652,7 @@ impl App {
                                 let label = if matches!(mode, DocMode::Insert) { "Inserir" } else { "Salvar" };
                                 let save = ui
                                     .add_enabled(!*busy, egui::Button::new(RichText::new(label).strong()))
-                                    .on_hover_text("Ctrl+Enter")
+                                    .on_hover_text(keys("Ctrl+Enter"))
                                     .clicked();
                                 if ui.button("Cancelar").clicked() {
                                     outcome = Outcome::Close;
@@ -708,7 +708,7 @@ impl App {
                             .on_hover_text("$unset")
                             .clicked();
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            let save = ui.add_enabled(!*busy, egui::Button::new(RichText::new("Salvar").strong())).on_hover_text("Ctrl+Enter").clicked();
+                            let save = ui.add_enabled(!*busy, egui::Button::new(RichText::new("Salvar").strong())).on_hover_text(keys("Ctrl+Enter")).clicked();
                             if ui.button("Cancelar").clicked() {
                                 outcome = Outcome::Close;
                             }
@@ -1194,8 +1194,15 @@ impl App {
                                             ExportFormat::Csv => "csv",
                                         };
                                         let file_name = format!("{default_name}.{ext}");
-                                        self.backend.spawn_blocking(
-                                            move || rfd::FileDialog::new().set_title("Exportar").set_file_name(&file_name).save_file(),
+                                        self.backend.spawn(
+                                            async move {
+                                                rfd::AsyncFileDialog::new()
+                                                    .set_title("Exportar")
+                                                    .set_file_name(&file_name)
+                                                    .save_file()
+                                                    .await
+                                                    .map(|f| f.path().to_path_buf())
+                                            },
                                             move |app, path| {
                                                 let Some(path) = path else {
                                                     if let Some(Dialog::Export { busy, .. }) = app.dialog_mut(uid) {
@@ -1232,7 +1239,7 @@ impl App {
                     ui.label(RichText::new("db.runCommand(…)").weak().monospace());
                     let out = CodeEditor::new(Id::unique(("cmd", uid)), text, EditorKind::Command, &[]).rows(4).show(ui);
                     ui.horizontal(|ui| {
-                        let go = ui.add_enabled(!*busy, egui::Button::new(RichText::new("▶ Executar").strong())).on_hover_text("Ctrl+Enter").clicked();
+                        let go = ui.add_enabled(!*busy, egui::Button::new(RichText::new("▶ Executar").strong())).on_hover_text(keys("Ctrl+Enter")).clicked();
                         if *busy {
                             ui.spinner();
                         }
@@ -1312,7 +1319,7 @@ impl App {
                             ("Ctrl+Home / Ctrl+End", "Primeiro / último documento da coleção"),
                             ("Alt+⬅ / Alt+➡", "Página anterior / próxima"),
                             ("Enter (na tabela)", "Abrir documento selecionado"),
-                            ("Delete (na tabela)", "Excluir documento selecionado"),
+                            ("Delete ou Ctrl+Backspace (na tabela)", "Excluir documento selecionado"),
                             ("Ctrl+C (na tabela)", "Copiar documento selecionado"),
                             ("Duplo clique na célula", "Editar o campo"),
                             ("Clique no cabeçalho", "Ordenar (Shift: ordenação múltipla)"),
@@ -1321,7 +1328,7 @@ impl App {
                             ("Ctrl + / Ctrl − / Ctrl 0", "Zoom"),
                             ("Esc", "Fechar diálogo"),
                         ] {
-                            ui.label(RichText::new(k).monospace().strong());
+                            ui.label(RichText::new(keys(k)).monospace().strong());
                             ui.label(v);
                             ui.end_row();
                         }

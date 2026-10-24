@@ -1,6 +1,6 @@
 //! Conteúdo das abas: Documentos, Agregação, Esquema e Índices.
 
-use crate::app::{ACCENT, ACCENT_DARK, App, Paged, PendingSelect, ResultView, View, ViewMode, fmt_bytes, fmt_num};
+use crate::app::{ACCENT, ACCENT_DARK, App, keys, Paged, PendingSelect, ResultView, View, ViewMode, fmt_bytes, fmt_num};
 use crate::completion::EditorKind;
 use crate::config::{HistoryEntry, SavedPipeline};
 use crate::dialogs::{ConfirmAction, Dialog, ExportSource};
@@ -94,7 +94,7 @@ fn pager(ui: &mut Ui, id: Id, p: &mut Paged) -> Option<PagerAction> {
         });
     if ui
         .add_enabled(last.is_some_and(|l| p.page < l), egui::Button::new("⏭"))
-        .on_hover_text("Última página (Ctrl+End)")
+        .on_hover_text(keys("Última página (Ctrl+End)"))
         .on_disabled_hover_text(if p.total.is_none() { "Aguardando contagem…" } else { "Já está na última página" })
         .clicked()
     {
@@ -137,7 +137,7 @@ fn pager(ui: &mut Ui, id: Id, p: &mut Paged) -> Option<PagerAction> {
     }
     if ui
         .add_enabled(p.page > 0, egui::Button::new("⏮"))
-        .on_hover_text("Primeira página (Ctrl+Home)")
+        .on_hover_text(keys("Primeira página (Ctrl+Home)"))
         .clicked()
     {
         action = Some(PagerAction::First);
@@ -168,12 +168,12 @@ fn grid_keyboard(ui: &Ui, p: &mut Paged, editable: bool) -> Vec<TabAction> {
             i.consume_key(Modifiers::NONE, Key::PageUp),
             i.consume_key(Modifiers::NONE, Key::Home),
             i.consume_key(Modifiers::NONE, Key::End),
-            i.consume_key(Modifiers::COMMAND, Key::Home),
-            i.consume_key(Modifiers::COMMAND, Key::End),
+            i.consume_key(Modifiers::COMMAND, Key::Home) || i.consume_key(Modifiers::COMMAND, Key::ArrowUp),
+            i.consume_key(Modifiers::COMMAND, Key::End) || i.consume_key(Modifiers::COMMAND, Key::ArrowDown),
             i.consume_key(Modifiers::ALT, Key::ArrowLeft),
             i.consume_key(Modifiers::ALT, Key::ArrowRight),
             i.consume_key(Modifiers::NONE, Key::Enter),
-            i.consume_key(Modifiers::NONE, Key::Delete),
+            i.consume_key(Modifiers::NONE, Key::Delete) || i.consume_key(Modifiers::COMMAND, Key::Backspace),
             i.events.iter().any(|e| matches!(e, egui::Event::Copy)),
             i.consume_key(Modifiers::NONE, Key::F5),
         )
@@ -636,7 +636,7 @@ impl App {
         let a = &mut tab.agg;
 
         ui.horizontal(|ui| {
-            if ui.button(RichText::new("▶ Executar").strong()).on_hover_text("Ctrl+Enter").clicked() {
+            if ui.button(RichText::new("▶ Executar").strong()).on_hover_text(keys("Ctrl+Enter")).clicked() {
                 actions.push(TabAction::RunAgg);
             }
             if ui.button("Explain").clicked() {
@@ -723,7 +723,7 @@ impl App {
         if a.applied.is_none() && a.paged.result.is_none() && a.paged.error.is_none() {
             ui.add_space(20.0);
             ui.vertical_centered(|ui| {
-                ui.label(RichText::new("Escreva o pipeline e clique em Executar (Ctrl+Enter).").weak());
+                ui.label(RichText::new(keys("Escreva o pipeline e clique em Executar (Ctrl+Enter).")).weak());
                 ui.label(RichText::new("Ctrl+Espaço sugere estágios, operadores e campos ($campo).").weak());
             });
         }
@@ -1466,15 +1466,16 @@ impl App {
     fn import_file(&mut self, tab_id: u64, csv: bool) {
         let Some(tab) = self.tab(tab_id) else { return };
         let (client, ns) = (tab.client.clone(), tab.ns.clone());
-        self.backend.spawn_blocking(
-            move || {
-                let dialog = rfd::FileDialog::new().set_title("Importar documentos");
+        // Diálogo assíncrono: no macOS o síncrono só pode rodar na thread principal.
+        self.backend.spawn(
+            async move {
+                let dialog = rfd::AsyncFileDialog::new().set_title("Importar documentos");
                 let dialog = if csv {
                     dialog.add_filter("CSV", &["csv"])
                 } else {
                     dialog.add_filter("JSON", &["json", "jsonl", "ndjson"])
                 };
-                dialog.add_filter("Todos", &["*"]).pick_file()
+                dialog.add_filter("Todos", &["*"]).pick_file().await.map(|f| f.path().to_path_buf())
             },
             move |app, path| {
                 let Some(path) = path else { return };

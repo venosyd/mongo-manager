@@ -1,3 +1,6 @@
+// No Windows, a versão release abre sem janela de console.
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
+
 mod app;
 mod completion;
 mod config;

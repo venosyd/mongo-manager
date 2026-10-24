@@ -36,21 +36,6 @@ impl Backend {
             ctx.request_repaint();
         });
     }
-
-    pub fn spawn_blocking<T, F, H>(&self, f: F, done: H)
-    where
-        T: Send + 'static,
-        F: FnOnce() -> T + Send + 'static,
-        H: FnOnce(&mut App, T) + Send + 'static,
-    {
-        let tx = self.tx.clone();
-        let ctx = self.ctx.clone();
-        self.rt.spawn_blocking(move || {
-            let v = f();
-            let _ = tx.send(Box::new(move |app: &mut App| done(app, v)));
-            ctx.request_repaint();
-        });
-    }
 }
 
 pub struct Toast {
@@ -276,6 +261,20 @@ pub struct App {
     screenshot: Option<(String, Instant)>,
     shot_counter: u32,
     script: Option<crate::script::Script>,
+}
+
+/// Adapta a descrição de um atalho à plataforma: no macOS, Ctrl vira Cmd (exceto Ctrl+Espaço e
+/// Ctrl+Tab) e Home/End viram ⬆/⬇, já que os teclados do Mac não têm essas teclas.
+pub fn keys(s: &str) -> String {
+    if cfg!(target_os = "macos") {
+        s.replace("Ctrl", "Cmd")
+            .replace("Cmd+Espaço", "Ctrl+Espaço")
+            .replace("Cmd+Tab", "Ctrl+Tab")
+            .replace("Cmd+Home", "Cmd+⬆")
+            .replace("Cmd+End", "Cmd+⬇")
+    } else {
+        s.to_string()
+    }
 }
 
 pub fn fmt_num(n: u64) -> String {
@@ -766,12 +765,12 @@ impl App {
                     self.save_config();
                 }
                 ui.separator();
-                if ui.small_button("A+").on_hover_text("Aumentar zoom (Ctrl +)").clicked() {
+                if ui.small_button("A+").on_hover_text(keys("Aumentar zoom (Ctrl +)")).clicked() {
                     self.config.settings.zoom = (self.config.settings.zoom + 0.1).min(2.5);
                     self.save_config();
                 }
                 ui.label(format!("{:.0}%", self.config.settings.zoom * 100.0));
-                if ui.small_button("A−").on_hover_text("Diminuir zoom (Ctrl −)").clicked() {
+                if ui.small_button("A−").on_hover_text(keys("Diminuir zoom (Ctrl −)")).clicked() {
                     self.config.settings.zoom = (self.config.settings.zoom - 0.1).max(0.6);
                     self.save_config();
                 }
@@ -1155,7 +1154,7 @@ impl App {
                 "Duplo clique numa célula edita o campo; Enter abre o documento inteiro.",
                 "Nos filtros, Ctrl+Espaço mostra as sugestões de campos e operadores.",
             ] {
-                ui.label(RichText::new(format!("• {tip}")).weak());
+                ui.label(RichText::new(format!("• {}", keys(tip))).weak());
             }
         });
     }

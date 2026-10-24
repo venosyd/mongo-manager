@@ -33,9 +33,22 @@ e **consultas com autocomplete**.
 - Árvore de conexões → bancos → coleções com filtro, criar/renomear/excluir coleção, excluir banco,
   executar comandos (`db.runCommand`), histórico e favoritos de consultas, tema claro/escuro e zoom.
 
-## Compilar e executar
+## Download
 
-Requer Rust (stable) e as bibliotecas gráficas usuais do Linux (Wayland ou X11).
+Executáveis prontos para **Linux**, **Windows** e **macOS** (Apple Silicon e Intel) são gerados pelo
+GitHub Actions a cada versão (tag `v*`) e ficam na página
+[Releases](https://github.com/venosyd/mongo-manager/releases). Os builds de cada commit ficam
+disponíveis como artefatos na aba [Actions](https://github.com/venosyd/mongo-manager/actions).
+
+- **Windows**: descompacte o `.zip` e execute `mongo-manager.exe`.
+- **macOS**: descompacte e mova `Mongo Manager.app` para Aplicativos. O app não é assinado; na primeira
+  vez, clique com o botão direito → **Abrir**, ou rode
+  `xattr -dr com.apple.quarantine "/Applications/Mongo Manager.app"`.
+- **Linux**: descompacte o `.tar.gz` e execute `./mongo-manager` (Wayland ou X11).
+
+## Compilar
+
+Requer Rust stable (1.85 ou superior) em qualquer uma das três plataformas.
 
 ```bash
 cargo run --release
@@ -43,6 +56,9 @@ cargo run --release
 cargo install --path .
 mongo-manager
 ```
+
+No Linux são necessárias as bibliotecas gráficas usuais (no Debian/Ubuntu:
+`libxkbcommon-dev libgl1-mesa-dev libwayland-dev`). No Windows e no macOS não há dependências extras.
 
 Compatível com MongoDB **4.0 ou superior** (testado com 4.0 e 7.0).
 
@@ -55,10 +71,19 @@ mongodb://usuario:senha@localhost:27017/?authSource=admin
 mongodb+srv://usuario:senha@cluster0.exemplo.mongodb.net/
 ```
 
-As conexões, o histórico, os pipelines salvos e as larguras de coluna ficam em
-`~/.config/mongo-manager/config.json` (gravado com permissão `600`, pois a URI pode conter senha).
+As conexões, o histórico, os pipelines salvos e as larguras de coluna ficam em `config.json`, na pasta:
+
+| Sistema | Pasta |
+| --- | --- |
+| Linux | `~/.config/mongo-manager/` (arquivo com permissão `600`, pois a URI pode conter senha) |
+| Windows | `%APPDATA%\mongo-manager\` |
+| macOS | `~/Library/Application Support/mongo-manager/` |
 
 ## Atalhos
+
+No macOS, use **Cmd** no lugar de Ctrl (exceto `Ctrl+Espaço` e `Ctrl+Tab`); `Cmd+⬆` / `Cmd+⬇` vão para o
+primeiro / último documento e `Cmd+Backspace` exclui o documento selecionado. A janela de atalhos do app
+já mostra as teclas certas para cada sistema.
 
 | Atalho | Ação |
 | --- | --- |
@@ -71,7 +96,7 @@ As conexões, o histórico, os pipelines salvos e as larguras de coluna ficam em
 | `Ctrl+Home` / `Ctrl+End` | Primeiro / último documento da coleção |
 | `Alt+←` / `Alt+→` | Página anterior / próxima |
 | `Enter` na tabela | Abrir o documento selecionado |
-| `Delete` na tabela | Excluir o documento selecionado (`Enter` confirma) |
+| `Delete` ou `Ctrl+Backspace` na tabela | Excluir o documento selecionado (`Enter` confirma) |
 | `Ctrl+C` na tabela | Copiar o documento selecionado |
 | `F5` | Recarregar a página |
 | `Ctrl+W` / `Ctrl+Tab` | Fechar aba / próxima aba |
