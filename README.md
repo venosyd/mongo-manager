@@ -101,3 +101,7 @@ MM_TEST_URI=mongodb://127.0.0.1:27018 cargo test      # + integração (cria e a
 Variáveis úteis para testar a interface: `MM_CONFIG` (outro arquivo de configuração), `MM_CONN` e
 `MM_OPEN=banco.colecao` (conecta e abre a coleção ao iniciar), `MM_SHOT_DIR` (F12 salva screenshot)
 e `MM_SCRIPT` (injeta cliques e teclas a partir de um roteiro; veja `src/script.rs`).
+
+## Licença
+
+MIT — veja [LICENSE](LICENSE).

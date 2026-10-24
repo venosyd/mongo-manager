@@ -2,6 +2,8 @@
 name = "mongo-manager"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+repository = "https://github.com/venosyd/mongo-manager"
 
 [dependencies]
 bson = { version = "2", features = ["chrono-0_4", "uuid-1"] }
