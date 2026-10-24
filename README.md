@@ -69,7 +69,7 @@ mongo-manager
 No Linux são necessárias as bibliotecas gráficas usuais (no Debian/Ubuntu:
 `libxkbcommon-dev libgl1-mesa-dev libwayland-dev`). No Windows e no macOS não há dependências extras.
 
-Compatível com MongoDB **4.0 ou superior** (testado com 4.0 e 7.0).
+Compatível com MongoDB **3.6 ou superior** (testado com 3.6, 4.0 e 7.0).
 
 ## Conexões
 
