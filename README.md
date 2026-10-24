@@ -35,16 +35,25 @@ e **consultas com autocomplete**.
 
 ## Download
 
-Executáveis prontos para **Linux**, **Windows** e **macOS** (Apple Silicon e Intel) são gerados pelo
-GitHub Actions a cada versão (tag `v*`) e ficam na página
-[Releases](https://github.com/venosyd/mongo-manager/releases). Os builds de cada commit ficam
-disponíveis como artefatos na aba [Actions](https://github.com/venosyd/mongo-manager/actions).
+Baixe a versão mais recente na página [Releases](https://github.com/venosyd/mongo-manager/releases):
 
-- **Windows**: descompacte o `.zip` e execute `mongo-manager.exe`.
-- **macOS**: descompacte e mova `Mongo Manager.app` para Aplicativos. O app não é assinado; na primeira
-  vez, clique com o botão direito → **Abrir**, ou rode
+| Sistema | Instalador | Portátil |
+| --- | --- | --- |
+| Windows 10/11 (x64) | `mongo-manager-<versão>-windows-x64-setup.exe` | `…-windows-x64-portable.zip` |
+| macOS Apple Silicon | `mongo-manager-<versão>-macos-apple-silicon.dmg` | — |
+| macOS Intel | `mongo-manager-<versão>-macos-intel.dmg` | — |
+| Debian / Ubuntu (x64) | `mongo-manager_<versão>-1_amd64.deb` | `…-linux-x64.tar.gz` |
+
+- **Windows**: execute o instalador (cria atalho no menu Iniciar e desinstalador). Como ele não é
+  assinado, o SmartScreen pode avisar: clique em *Mais informações* → **Executar assim mesmo**.
+- **macOS**: abra o `.dmg` e arraste *Mongo Manager* para Aplicativos. O app não é assinado com
+  certificado da Apple; na primeira vez, clique com o botão direito → **Abrir**, ou rode
   `xattr -dr com.apple.quarantine "/Applications/Mongo Manager.app"`.
-- **Linux**: descompacte o `.tar.gz` e execute `./mongo-manager` (Wayland ou X11).
+- **Linux**: `sudo apt install ./mongo-manager_<versão>-1_amd64.deb`, ou descompacte o `.tar.gz` e
+  execute `./mongo-manager`.
+
+Os releases são gerados pelo GitHub Actions a cada tag `v*`; os builds de cada commit ficam como
+artefatos na aba [Actions](https://github.com/venosyd/mongo-manager/actions).
 
 ## Compilar
 

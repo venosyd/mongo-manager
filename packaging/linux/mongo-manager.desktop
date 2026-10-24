@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Mongo Manager
+Comment=Gerenciador de bancos MongoDB
+Exec=mongo-manager
+Icon=mongo-manager
+Terminal=false
+Categories=Development;Database;
+StartupWMClass=mongo-manager

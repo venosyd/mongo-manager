@@ -2,6 +2,8 @@
 name = "mongo-manager"
 version = "0.1.0"
 edition = "2024"
+description = "Gerenciador de bancos MongoDB em Rust"
+authors = ["Venosyd"]
 license = "MIT"
 repository = "https://github.com/venosyd/mongo-manager"
 
@@ -27,3 +29,19 @@ egui = { version = "0.37", features = ["monochrome_emoji_fonts"] }
 lto = "thin"
 codegen-units = 4
 strip = true
+
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1"
+
+[package.metadata.deb]
+maintainer = "Venosyd"
+copyright = "2026, Venosyd"
+section = "database"
+extended-description = "Gerenciador de bancos MongoDB: tabela com colunas redimensionáveis, ordenação por coluna, navegação até o fim da coleção e autocomplete em consultas e agregações."
+depends = "$auto"
+assets = [
+    ["target/release/mongo-manager", "usr/bin/", "755"],
+    ["packaging/linux/mongo-manager.desktop", "usr/share/applications/", "644"],
+    ["assets/icon-256.png", "usr/share/icons/hicolor/256x256/apps/mongo-manager.png", "644"],
+    ["README.md", "usr/share/doc/mongo-manager/README.md", "644"],
+]
