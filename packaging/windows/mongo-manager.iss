@@ -1,5 +1,5 @@
 ; Instalador do Windows (Inno Setup 6). Compilar com:
-;   iscc /DAppVersion=0.1.0 packaging\windows\mongo-manager.iss
+;   iscc /DAppVersion=0.1.1 packaging\windows\mongo-manager.iss
 #ifndef AppVersion
   #define AppVersion "0.0.0"
 #endif
